@@ -11,6 +11,9 @@ class BookingManagementSystem:
         # Set the background color to white
         self.root.configure(background='white')
 
+        # Make the window full-screen
+        self.root.attributes('-fullscreen', True)
+
         # Menu Bar
         menu_bar = tk.Menu(root)
         root.config(menu=menu_bar)
@@ -21,7 +24,7 @@ class BookingManagementSystem:
         file_menu.add_command(label="Import Data", command=self.import_data)
 
         # Create a DataFrame for holding booking data
-        self.booking_data = pd.DataFrame(columns=['Header', 'Date', 'Booking Ref', 'Name'])
+        self.booking_data = pd.DataFrame(columns=['Booking Date', 'Travel Date', 'Booking Ref', 'Name'])
 
         # Create a table (Treeview) for displaying data
         columns = list(self.booking_data.columns)
@@ -30,21 +33,33 @@ class BookingManagementSystem:
 
         for col in columns:
             self.tree.heading(col, text=col)
-            self.tree.column(col, width=100)  # Adjust the width as needed
+            self.tree.column(col, width=100, anchor='center')  # Adjust the width as needed
 
-        self.tree.pack(pady=20)
+        # Configure row and column weights for expanding
+        root.grid_rowconfigure(1, weight=1)
+        root.grid_columnconfigure(0, weight=1)
+
+        self.tree.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
 
     def import_data(self):
         file_path = filedialog.askopenfilename(filetypes=[('Excel Files', '*.xlsx;*.xls')])
         if file_path:
             try:
-                new_data = pd.read_excel(file_path)
+                all_data = pd.read_excel(file_path, sheet_name=None)
 
-                # Extract and transform data
-                self.booking_data['Header'] = new_data['A'].iloc[1:]
-                self.booking_data['Date'] = pd.to_datetime(new_data['C'], format='%d/%m/%Y %H:%M', errors='coerce')
-                self.booking_data['Booking Ref'] = new_data['D']
-                self.booking_data['Name'] = new_data['H'] + ' ' + new_data['I']
+                # Clear existing data in the DataFrame
+                self.booking_data = pd.DataFrame(columns=['Booking Date', 'Travel Date', 'Booking Ref', 'Name'])
+
+                # Iterate through all sheets and append data to the DataFrame
+                for sheet_name, data in all_data.items():
+                    sheet_data = pd.DataFrame()
+                    sheet_data['Booking Date'] = pd.to_datetime(data['Purchase Date (local time)'], format='%d/%m/%Y %H:%M', errors='coerce').dt.strftime('%d/%m/%Y %H:%M')
+                    sheet_data['Travel Date'] = pd.to_datetime(data['Date'], format='%d/%m/%Y', errors='coerce').dt.strftime('%d/%m/%Y')
+                    sheet_data['Booking Ref'] = data['Booking Ref #']
+                    sheet_data['Name'] = data['Traveler\'s First Name'] + ' ' + data['Traveler\'s Last Name']
+
+                    # Append data to the main DataFrame
+                    self.booking_data = pd.concat([self.booking_data, sheet_data], ignore_index=True)
 
                 self.update_treeview()
                 print("Data Imported and Transformed Successfully!")
