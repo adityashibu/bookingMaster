@@ -118,7 +118,7 @@ class BookingManagementSystem:
         except Exception as e:
             print(f"Error loading column configuration: {e}")
 
-    #===========================================================================================================================#
+    #===================================================IMPORT DATA====================================================#
 
     def import_data(self):
         file_path = filedialog.askopenfilename(filetypes=[('Excel Files', '*.xlsx;*.xls')])
