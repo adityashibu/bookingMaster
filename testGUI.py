@@ -25,7 +25,7 @@ class BookingManagementSystem:
         file_menu.add_command(label="Import Data", command=self.import_data)
 
         # Create a DataFrame for holding booking data
-        self.booking_data = pd.DataFrame(columns=['Count', 'Booking Date', 'Travel Date', 'Booking Ref', 'Name'])
+        self.booking_data = pd.DataFrame(columns=['Count', 'Booking Date', 'Travel Date', 'Booking Ref', 'Name', 'Phone No'])
 
         # Create a table (Treeview) for displaying data
         columns = list(self.booking_data.columns)
@@ -138,6 +138,7 @@ class BookingManagementSystem:
                     sheet_data['Travel Date'] = pd.to_datetime(data['Date'], format='%d/%m/%Y', errors='coerce').dt.strftime('%d/%m/%Y')
                     sheet_data['Booking Ref'] = data['Booking Ref #']
                     sheet_data['Name'] = data['Traveler\'s First Name'] + ' ' + data['Traveler\'s Last Name']
+                    sheet_data['Phone No'] = data['Phone']
 
                     sheet_data['Count'] = range(count + 1, count + 1 + len(sheet_data))
                     count += len(sheet_data)
