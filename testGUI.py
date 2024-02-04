@@ -24,8 +24,13 @@ class BookingManagementSystem:
         menu_bar.add_cascade(label="File", menu=file_menu)
         file_menu.add_command(label="Import Data", command=self.import_data)
 
+        # Search Menu
+        search_menu = tk.Menu(menu_bar, tearoff=0)
+        menu_bar.add_cascade(label="Search", menu=search_menu)
+        search_menu.add_command(label="Filter Data", command=self.show_search_dialog)
+
         # Create a DataFrame for holding booking data
-        self.booking_data = pd.DataFrame(columns=['Count', 'Booking Date', 'Travel Date', 'Booking Ref', 'Name', 'Phone No'])
+        self.booking_data = pd.DataFrame(columns=['Count', 'Booking Date', 'Travel Date', 'Booking Ref', 'Name', 'Phone No', 'Adult', 'Net Price'])
 
         # Create a table (Treeview) for displaying data
         columns = list(self.booking_data.columns)
@@ -139,6 +144,8 @@ class BookingManagementSystem:
                     sheet_data['Booking Ref'] = data['Booking Ref #']
                     sheet_data['Name'] = data['Traveler\'s First Name'] + ' ' + data['Traveler\'s Last Name']
                     sheet_data['Phone No'] = data['Phone']
+                    sheet_data['Adult'] = pd.to_numeric(data['Adult'], errors='coerce')
+                    sheet_data['Net Price'] = pd.to_numeric(data['Net Price'].str.replace(' AED', ''), errors='coerce')
 
                     sheet_data['Count'] = range(count + 1, count + 1 + len(sheet_data))
                     count += len(sheet_data)
@@ -152,13 +159,57 @@ class BookingManagementSystem:
             except Exception as e:
                 print(f"Error importing and transforming data: {e}")
 
-    def update_treeview(self):
+    #================================================SEACRH DATA====================================================#
+    def show_search_dialog(self):
+        # Create a search dialog
+        search_dialog = tk.Toplevel(self.root)
+        search_dialog.title("Search Options")
+
+        # Create a label and dropdown menu for selecting search criteria
+        tk.Label(search_dialog, text="Select Search Criteria:").grid(row=0, column=0, padx=10, pady=10)
+        search_criteria_var = tk.StringVar()
+        search_criteria_var.set("Booking Ref")  # Set default value
+        search_criteria_menu = ttk.Combobox(search_dialog, textvariable=search_criteria_var, values=['Booking Ref', 'Customer Name', 'No of Adults'])
+        search_criteria_menu.grid(row=0, column=1, padx=10, pady=10)
+
+        # Create an entry widget for entering search value
+        tk.Label(search_dialog, text="Enter Search Value:").grid(row=1, column=0, padx=10, pady=10)
+        search_value_var = tk.StringVar()
+        search_value_entry = tk.Entry(search_dialog, textvariable=search_value_var)
+        search_value_entry.grid(row=1, column=1, padx=10, pady=10)
+
+        # Create a button to apply the search
+        search_button = tk.Button(search_dialog, text="Search", command=lambda: self.apply_search(search_criteria_var.get(), search_value_var.get(), search_dialog))
+        search_button.grid(row=2, column=0, columnspan=2, pady=10)
+
+    def apply_search(self, criteria, value, search_dialog):
+        # Apply the search and update the treeview
+        if criteria == 'Booking Ref':
+            result = self.booking_data[self.booking_data['Booking Ref'].astype(str).str.contains(value, case=False)]
+        elif criteria == 'Customer Name':
+            result = self.booking_data[self.booking_data['Name'].astype(str).str.contains(value, case=False)]
+        elif criteria == 'No of Adults':
+            result = self.booking_data[self.booking_data['Adult'] == int(value)]
+
+        # Update the treeview with the search result
+        self.update_treeview(data=result)
+
+        # Close the search dialog
+        search_dialog.destroy()
+
+    def update_treeview(self, data=None):
         # Clear existing items in the treeview
         for item in self.tree.get_children():
             self.tree.delete(item)
 
         # Insert new data into the treeview
-        for index, row in self.booking_data.iterrows():
+        if data is None:
+            data = self.booking_data
+
+        for index, row in data.iterrows():
+            values = row.tolist()
+            values[-1] = int(values[-1])  # Convert 'Adult' column to integer without decimal points
+            values[-2] = str(values[-2]) if pd.notna(values[-2]) else ""  # Convert 'Phone No' column to string
             self.tree.insert('', index, values=row.tolist(), tags=("style",))
 
         self.save_column_configuration()
