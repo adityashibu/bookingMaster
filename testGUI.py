@@ -47,15 +47,26 @@ class BookingManagementSystem:
 
         # Add a Sizegrip widget for automatic column width adjustment
         self.sizegrip = ttk.Sizegrip(root)
-        self.sizegrip.pack(side="bottom", fill="both")
 
         # Configure row and column weights for expanding
         root.grid_rowconfigure(1, weight=1)
         root.grid_columnconfigure(0, weight=1)
 
-        self.load_column_configuration()
+        # Add a horizontal scrollbar
+        x_scrollbar = ttk.Scrollbar(root, orient='horizontal', command=self.tree.xview)
+        self.tree.configure(xscrollcommand=x_scrollbar.set)
 
-        self.tree.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+        # Add a vertical scrollbar
+        y_scrollbar = ttk.Scrollbar(root, orient='vertical', command=self.tree.yview)
+        self.tree.configure(yscrollcommand=y_scrollbar.set)
+
+        # Place widgets in the grid
+        self.tree.pack(fill=tk.BOTH, expand=True)
+        x_scrollbar.pack(side=tk.BOTTOM, fill=tk.X)
+        y_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.sizegrip.pack(side="bottom", fill="both")
+
+        self.load_column_configuration()
 
     #=========================================COLUMN RESIZING===================================================#
 
