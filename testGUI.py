@@ -28,6 +28,10 @@ class BookingManagementSystem:
         search_menu = tk.Menu(menu_bar, tearoff=0)
         menu_bar.add_cascade(label="Search", menu=search_menu)
         search_menu.add_command(label="Filter Data", command=self.show_search_dialog)
+        self.revert_filter_enabled = False  # Flag to track whether a filter is applied
+        search_menu.add_command(label="Revert Filter", command=self.revert_filter, state=tk.DISABLED)
+
+        self.search_menu = search_menu
 
         # Create a DataFrame for holding booking data
         self.booking_data = pd.DataFrame(columns=['Count', 'Booking Date', 'Travel Date', 'Booking Ref', 'Name', 'Phone No', 'Adult', 'Net Price'])
@@ -182,6 +186,9 @@ class BookingManagementSystem:
         search_button = tk.Button(search_dialog, text="Search", command=lambda: self.apply_search(search_criteria_var.get(), search_value_var.get(), search_dialog))
         search_button.grid(row=2, column=0, columnspan=2, pady=10)
 
+        # Enable or disable "Revert Filter" based on the filter status
+        self.search_menu.entryconfig("Revert Filter", state=tk.NORMAL if self.revert_filter_enabled else tk.DISABLED)
+
     def apply_search(self, criteria, value, search_dialog):
         # Apply the search and update the treeview
         if criteria == 'Booking Ref':
@@ -194,8 +201,24 @@ class BookingManagementSystem:
         # Update the treeview with the search result
         self.update_treeview(data=result)
 
-        # Close the search dialog
+        # Set the flag to indicate that a filter is applied
+        self.revert_filter_enabled = True
+
+        # Enable "Revert Filter" based on the filter status
+        self.search_menu.entryconfig("Revert Filter", state=tk.NORMAL)
+
+        # Destroy the search dialog
         search_dialog.destroy()
+
+    def revert_filter(self):
+        # Revert the filter and update the treeview
+        self.update_treeview(data=self.booking_data)
+
+        # Reset the flag to indicate that no filter is applied
+        self.revert_filter_enabled = False
+
+        # Disable "Revert Filter" since no filter is applied
+        self.search_menu.entryconfig("Revert Filter", state=tk.DISABLED)
 
     def update_treeview(self, data=None):
         # Clear existing items in the treeview
