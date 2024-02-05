@@ -3,11 +3,15 @@ from tkinter import filedialog
 from tkinter import ttk
 import pandas as pd
 import json
+import sqlite3
 
 class BookingManagementSystem:
     def __init__(self, root):
         self.root = root
         self.root.title("Booking Management System")
+
+        # Set up a protocol handler to call save_data_to_db before closing
+        root.protocol("WM_DELETE_WINDOW", self.on_close)
 
         # Set the background color to white
         self.root.configure(background='white')
@@ -23,6 +27,7 @@ class BookingManagementSystem:
         file_menu = tk.Menu(menu_bar, tearoff=0)
         menu_bar.add_cascade(label="File", menu=file_menu)
         file_menu.add_command(label="Import Data", command=self.import_data)
+        file_menu.add_command(label="Close", command=self.on_close)
 
         # Search Menu
         search_menu = tk.Menu(menu_bar, tearoff=0)
@@ -75,7 +80,88 @@ class BookingManagementSystem:
         y_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.sizegrip.pack(side="bottom", fill="both")
 
+        # SQLite Database connection
+        self.db_connection = sqlite3.connect('booking_data.db')
+        self.create_table_if_not_exists()
+
+        # Load data from the SQLite database
+        self.load_data_from_db()
+
         self.load_column_configuration()
+
+    #======================================DB CONNECTIONS AND CONFIGURATIONS====================================#
+        
+    def on_close(self):
+        # Save data to the SQLite database before closing
+        self.save_data_to_db()
+        self.root.destroy()
+    
+    def create_table_if_not_exists(self):
+        # Create a table if it doesn't exist in the SQLite database
+        query = '''
+        CREATE TABLE IF NOT EXISTS bookings (
+            ID INTEGER PRIMARY KEY AUTOINCREMENT,
+            Booking_Date TEXT,
+            Travel_Date TEXT,
+            Booking_Ref TEXT,
+            Name TEXT,
+            Phone_No TEXT,
+            Adult INTEGER,
+            Net_Price REAL
+        );
+        '''
+        self.db_connection.execute(query)
+        self.db_connection.commit()
+
+    def save_data_to_db(self):
+        # Save data to the SQLite database
+        self.db_connection.execute('DELETE FROM bookings;')  # Clear existing data
+        self.booking_data.to_sql('bookings', self.db_connection, index=False, if_exists='replace')
+        self.db_connection.commit()
+
+    def load_data_from_db(self):
+        # Load data from the SQLite database
+        try:
+            self.booking_data = pd.read_sql_query('SELECT * FROM bookings;', self.db_connection)
+            self.update_treeview()
+        except pd.io.sql.DatabaseError:
+            # Use default data if the table is empty or not found
+            self.booking_data = pd.DataFrame(columns=['Booking_Date', 'Travel_Date', 'Booking_Ref', 'Name', 'Phone_No', 'Adult', 'Net_Price'])
+            self.update_treeview()
+
+    def import_data(self):
+        file_path = filedialog.askopenfilename(filetypes=[('Excel Files', '*.xlsx;*.xls')])
+        if file_path:
+            try:
+                all_data = pd.read_excel(file_path, sheet_name=None)
+
+                # Clear existing data in the DataFrame and the SQLite database
+                self.booking_data = pd.DataFrame(columns=['Booking_Date', 'Travel_Date', 'Booking_Ref', 'Name', 'Phone_No', 'Adult', 'Net_Price'])
+                self.save_data_to_db()
+
+                count = 0
+
+                # Iterate through all sheets and append data to the DataFrame and SQLite database
+                for sheet_name, data in all_data.items():
+                    sheet_data = pd.DataFrame()
+                    sheet_data['Booking_Date'] = pd.to_datetime(data['Purchase Date (local time)'], format='%d/%m/%Y %H:%M', errors='coerce').dt.strftime('%d/%m/%Y %H:%M')
+                    sheet_data['Travel_Date'] = pd.to_datetime(data['Date'], format='%d/%m/%Y', errors='coerce').dt.strftime('%d/%m/%Y')
+                    sheet_data['Booking_Ref'] = data['Booking Ref #']
+                    sheet_data['Name'] = data['Traveler\'s First Name'] + ' ' + data['Traveler\'s Last Name']
+                    sheet_data['Phone_No'] = data['Phone']
+                    sheet_data['Adult'] = pd.to_numeric(data['Adult'], errors='coerce')
+                    sheet_data['Net_Price'] = pd.to_numeric(data['Net Price'].str.replace(' AED', ''), errors='coerce')
+
+                    sheet_data['Count'] = range(count + 1, count + 1 + len(sheet_data))
+                    count += len(sheet_data)
+
+                    # Append data to the main DataFrame and SQLite database
+                    self.booking_data = pd.concat([self.booking_data, sheet_data], ignore_index=True)
+                    self.save_data_to_db()
+
+                print("Data Imported and Transformed Successfully!")
+            except Exception as e:
+                print(f"Error importing and transforming data: {e}")
 
     #=========================================COLUMN RESIZING===================================================#
 
