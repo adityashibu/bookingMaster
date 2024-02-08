@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog
 from tkinter import ttk
+from tkinter import messagebox
 import pandas as pd
 import json
 import sqlite3
@@ -27,6 +28,8 @@ class BookingManagementSystem:
         file_menu = tk.Menu(menu_bar, tearoff=0)
         menu_bar.add_cascade(label="File", menu=file_menu)
         file_menu.add_command(label="Import Data", command=self.import_data)
+        file_menu.add_command(label="Export to Excel", command=self.export_to_excel)  # Add Export to Excel option
+        file_menu.add_separator()
         file_menu.add_command(label="Close", command=self.on_close)
 
         # Search Menu
@@ -88,6 +91,22 @@ class BookingManagementSystem:
         self.load_data_from_db()
 
         self.load_column_configuration()
+        
+    def export_to_excel(self):
+        # Check if there is data to export
+        if self.booking_data.empty:
+            messagebox.showinfo("No Data", "There is no data to export.")
+            return
+
+        # Ask user for file save location
+        file_path = filedialog.asksaveasfilename(defaultextension=".xlsx", filetypes=[("Excel files", "*.xlsx")])
+        if file_path:
+            try:
+                # Write data to Excel file
+                self.booking_data.to_excel(file_path, index=False)
+                messagebox.showinfo("Export Successful", f"Data exported to {file_path} successfully.")
+            except Exception as e:
+                messagebox.showerror("Export Error", f"An error occurred while exporting data: {e}")
 
     #======================================DB CONNECTIONS AND CONFIGURATIONS====================================#
         
