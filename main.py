@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import filedialog
 from tkinter import ttk
 from tkinter import messagebox
+from tkcalendar import DateEntry
 import pandas as pd
 import json
 import sqlite3
@@ -288,23 +289,42 @@ class BookingManagementSystem:
         tk.Label(search_dialog, text="Select Search Criteria:").grid(row=0, column=0, padx=10, pady=10)
         search_criteria_var = tk.StringVar()
         search_criteria_var.set("Booking Ref")  # Set default value
-        search_criteria_menu = ttk.Combobox(search_dialog, textvariable=search_criteria_var, values=['Booking Ref', 'Customer Name', 'No of Adults'])
+        search_criteria_menu = ttk.Combobox(search_dialog, textvariable=search_criteria_var, values=['Booking Ref', 'Customer Name', 'No of Adults', 'Travel Date'])
         search_criteria_menu.grid(row=0, column=1, padx=10, pady=10)
 
-        # Create an entry widget for entering search value
+        # Create a label and entry widget for entering search value
         tk.Label(search_dialog, text="Enter Search Value:").grid(row=1, column=0, padx=10, pady=10)
         search_value_var = tk.StringVar()
         search_value_entry = tk.Entry(search_dialog, textvariable=search_value_var)
         search_value_entry.grid(row=1, column=1, padx=10, pady=10)
 
+        # Create a date picker for selecting the date
+        tk.Label(search_dialog, text="Select Date:").grid(row=2, column=0, padx=10, pady=10)
+        date_var = tk.StringVar()
+        date_entry = DateEntry(search_dialog, textvariable=date_var, date_pattern='dd/mm/yyyy')
+        date_entry.grid(row=2, column=1, padx=10, pady=10)
+        date_entry.grid_remove()  # Hide the date picker initially
+
+        # Function to toggle between entry and date picker
+        def toggle_input_widget():
+            if search_criteria_var.get() == 'Travel Date':
+                search_value_entry.grid_remove()
+                date_entry.grid()
+            else:
+                date_entry.grid_remove()
+                search_value_entry.grid()
+
+        # Bind the function to the search criteria dropdown
+        search_criteria_menu.bind("<<ComboboxSelected>>", lambda event: toggle_input_widget())
+
         # Create a button to apply the search
-        search_button = tk.Button(search_dialog, text="Search", command=lambda: self.apply_search(search_criteria_var.get(), search_value_var.get(), search_dialog))
-        search_button.grid(row=2, column=0, columnspan=2, pady=10)
+        search_button = tk.Button(search_dialog, text="Search", command=lambda: self.apply_search(search_criteria_var.get(), search_value_var.get(), date_var.get(), search_dialog))
+        search_button.grid(row=3, column=0, columnspan=2, pady=10)
 
         # Enable or disable "Revert Filter" based on the filter status
         self.search_menu.entryconfig("Revert Filter", state=tk.NORMAL if self.revert_filter_enabled else tk.DISABLED)
 
-    def apply_search(self, criteria, value, search_dialog):
+    def apply_search(self, criteria, value, date_value, search_dialog):
         # Apply the search and update the treeview
         if criteria == 'Booking Ref':
             result = self.booking_data[self.booking_data['Booking Ref'].astype(str).str.contains(value, case=False)]
@@ -312,6 +332,8 @@ class BookingManagementSystem:
             result = self.booking_data[self.booking_data['Name'].astype(str).str.contains(value, case=False)]
         elif criteria == 'No of Adults':
             result = self.booking_data[self.booking_data['Adult'] == int(value)]
+        elif criteria == 'Travel Date':
+            result = self.booking_data[self.booking_data['Travel Date'] == date_value]
 
         # Update the treeview with the search result
         self.update_treeview(data=result)
