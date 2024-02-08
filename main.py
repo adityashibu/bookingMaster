@@ -40,6 +40,11 @@ class BookingManagementSystem:
         search_menu.add_command(label="Revert Filter", command=self.revert_filter, state=tk.DISABLED)
 
         self.search_menu = search_menu
+        
+        # Mail Menu
+        mail_menu = tk.Menu(menu_bar, tearoff=0)
+        menu_bar.add_cascade(label="Mail", menu=mail_menu)
+        mail_menu.add_command(label="Mail to Customer", command=self.send_mail)
 
         # Create a DataFrame for holding booking data
         self.booking_data = pd.DataFrame(columns=['Count', 'Booking Date', 'Travel Date', 'Booking Ref', 'Name', 'Phone No', 'Adult', 'Net Price'])
@@ -92,6 +97,7 @@ class BookingManagementSystem:
 
         self.load_column_configuration()
         
+    # Command to convert file to excel
     def export_to_excel(self):
         # Check if there is data to export
         if self.booking_data.empty:
@@ -107,6 +113,10 @@ class BookingManagementSystem:
                 messagebox.showinfo("Export Successful", f"Data exported to {file_path} successfully.")
             except Exception as e:
                 messagebox.showerror("Export Error", f"An error occurred while exporting data: {e}")
+                
+    # Command to handle mail requests\
+    def send_mail(self):
+        pass
 
     #======================================DB CONNECTIONS AND CONFIGURATIONS====================================#
         
