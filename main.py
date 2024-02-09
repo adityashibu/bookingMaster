@@ -45,7 +45,7 @@ class BookingManagementSystem:
         # Mail Menu
         mail_menu = tk.Menu(menu_bar, tearoff=0)
         menu_bar.add_cascade(label="Mail", menu=mail_menu)
-        mail_menu.add_command(label="Mail to Customer", command=self.send_mail)
+        mail_menu.add_command(label="Mail to Customer", command=self.open_mail_window)
 
         # Create a DataFrame for holding booking data
         self.booking_data = pd.DataFrame(columns=['Count', 'Booking Date', 'Travel Date', 'Booking Ref', 'Name', 'Email', 'Phone No', 'Adult', 'Net Price'])
@@ -117,9 +117,78 @@ class BookingManagementSystem:
             except Exception as e:
                 messagebox.showerror("Export Error", f"An error occurred while exporting data: {e}")
                 
-    # Command to handle mail requests
-    def send_mail(self):
-        pass
+                
+    #===============================HANDLE MAIL REQUESTS AND MAIL WINDOWS=======================================#
+    def open_mail_window(self):
+        def fetch_data():
+            booking_ref = booking_ref_entry.get()
+            if booking_ref:
+                # Query the database to fetch data for the given booking reference
+                cursor = self.db_connection.cursor()
+                cursor.execute("SELECT Email, Phone_No, Travel_Date FROM bookings WHERE Booking_Ref=?", (booking_ref,))
+                result = cursor.fetchone()
+                cursor.close()
+
+                if result:
+                    # Autofill customer email, phone, and travel date fields
+                    customer_mail_entry.delete(0, tk.END)
+                    customer_mail_entry.insert(0, result[0])
+
+                    customer_phone_entry.delete(0, tk.END)
+                    customer_phone_entry.insert(0, result[1])
+
+                    customer_travel_date_entry.delete(0, tk.END)
+                    customer_travel_date_entry.insert(0, result[2])
+                else:
+                    messagebox.showerror("Error", "No data found for the given booking reference.")
+            else:
+                messagebox.showerror("Error", "Please enter a booking reference.")
+
+        mail_window = tk.Toplevel(self.root)
+        mail_window.title("Send Mail to Customer")
+
+        # Labels and entry widgets for booking reference, mail subject, mail body
+        tk.Label(mail_window, text="Booking Reference:").grid(row=0, column=0, padx=10, pady=10)
+        booking_ref_entry = tk.Entry(mail_window)
+        booking_ref_entry.grid(row=0, column=1, padx=10, pady=10)
+
+        # Button to fetch data
+        fetch_button = tk.Button(mail_window, text="Fetch Data", command=fetch_data)
+        fetch_button.grid(row=1, column=0, columnspan=2, padx=10, pady=10)
+
+        # Labels for customer mail, phone, and travel date
+        tk.Label(mail_window, text="Customer Mail:").grid(row=2, column=0, padx=10, pady=10)
+        customer_mail_entry = tk.Entry(mail_window)
+        customer_mail_entry.grid(row=2, column=1, padx=10, pady=10)
+
+        tk.Label(mail_window, text="Customer Phone:").grid(row=3, column=0, padx=10, pady=10)
+        customer_phone_entry = tk.Entry(mail_window)
+        customer_phone_entry.grid(row=3, column=1, padx=10, pady=10)
+
+        tk.Label(mail_window, text="Customer Travel Date:").grid(row=4, column=0, padx=10, pady=10)
+        customer_travel_date_entry = tk.Entry(mail_window)
+        customer_travel_date_entry.grid(row=4, column=1, padx=10, pady=10)
+
+        tk.Label(mail_window, text="Mail Subject:").grid(row=5, column=0, padx=10, pady=10)
+        mail_subject_entry = tk.Entry(mail_window)
+        mail_subject_entry.grid(row=5, column=1, padx=10, pady=10)
+
+        tk.Label(mail_window, text="Mail Body:").grid(row=6, column=0, padx=10, pady=10)
+        mail_body_entry = tk.Text(mail_window, height=5, width=30)
+        mail_body_entry.grid(row=6, column=1, padx=10, pady=10)
+
+        # File upload options
+        tk.Label(mail_window, text="Museum of the Future Tickets:").grid(row=7, column=0, padx=10, pady=10)
+        museum_tickets_button = tk.Button(mail_window, text="Upload")
+        museum_tickets_button.grid(row=7, column=1, padx=10, pady=10)
+
+        tk.Label(mail_window, text="Dubai Frame Tickets:").grid(row=8, column=0, padx=10, pady=10)
+        dubai_tickets_button = tk.Button(mail_window, text="Upload")
+        dubai_tickets_button.grid(row=8, column=1, padx=10, pady=10)
+
+        # Button to send mail
+        send_button = tk.Button(mail_window, text="Send Mail")
+        send_button.grid(row=9, column=0, columnspan=2, padx=10, pady=10)
 
     #======================================DB CONNECTIONS AND CONFIGURATIONS====================================#
         
