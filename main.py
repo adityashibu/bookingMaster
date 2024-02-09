@@ -117,7 +117,7 @@ class BookingManagementSystem:
             except Exception as e:
                 messagebox.showerror("Export Error", f"An error occurred while exporting data: {e}")
                 
-    # Command to handle mail requests\
+    # Command to handle mail requests
     def send_mail(self):
         pass
 
