@@ -48,7 +48,7 @@ class BookingManagementSystem:
         mail_menu.add_command(label="Mail to Customer", command=self.send_mail)
 
         # Create a DataFrame for holding booking data
-        self.booking_data = pd.DataFrame(columns=['Count', 'Booking Date', 'Travel Date', 'Booking Ref', 'Name', 'Phone No', 'Adult', 'Net Price'])
+        self.booking_data = pd.DataFrame(columns=['Count', 'Booking Date', 'Travel Date', 'Booking Ref', 'Name', 'Email', 'Phone No', 'Adult', 'Net Price'])
 
         # Create a table (Treeview) for displaying data
         columns = list(self.booking_data.columns)
@@ -65,7 +65,7 @@ class BookingManagementSystem:
             col_no_spaces = col.replace(' ', '_')  # Replace spaces with underscores
             if col != 'Count':  # Exclude 'Count' column from B1-Motion and ButtonRelease-1 bindings
                 col_index = self.tree['columns'].index(col)
-                self.tree.bind('<B1-Motion>', lambda event, c=col, i=col_index: self.on_column_resizing(event, c, i))
+                self.tree.bind('<B1-Motion>', lambda event, c=col, i=col_index: self.on_column_resizing(event, c))
                 self.tree.bind(f'<ButtonRelease-1>', self.on_column_release)
 
         # Add a Sizegrip widget for automatic column width adjustment
@@ -74,6 +74,8 @@ class BookingManagementSystem:
         # Configure row and column weights for expanding
         root.grid_rowconfigure(1, weight=1)
         root.grid_columnconfigure(0, weight=1)
+        
+        self.load_column_configuration()
 
         # Add a horizontal scrollbar
         x_scrollbar = ttk.Scrollbar(root, orient='horizontal', command=self.tree.xview)
@@ -124,6 +126,7 @@ class BookingManagementSystem:
     def on_close(self):
         # Save data to the SQLite database before closing
         self.save_data_to_db()
+        self.load_column_configuration()
         self.root.destroy()
     
     def create_table_if_not_exists(self):
@@ -137,7 +140,8 @@ class BookingManagementSystem:
             Name TEXT,
             Phone_No TEXT,
             Adult INTEGER,
-            Net_Price REAL
+            Net_Price REAL,
+            Email TEXT
         );
         '''
         self.db_connection.execute(query)
@@ -156,7 +160,7 @@ class BookingManagementSystem:
             self.update_treeview()
         except pd.io.sql.DatabaseError:
             # Use default data if the table is empty or not found
-            self.booking_data = pd.DataFrame(columns=['Booking_Date', 'Travel_Date', 'Booking_Ref', 'Name', 'Phone_No', 'Adult', 'Net_Price'])
+            self.booking_data = pd.DataFrame(columns=['Booking_Date', 'Travel_Date', 'Booking_Ref', 'Name', 'Phone_No', 'Adult', 'Net_Price', 'Email'])
             self.update_treeview()
 
     def import_data(self):
@@ -166,7 +170,7 @@ class BookingManagementSystem:
                 all_data = pd.read_excel(file_path, sheet_name=None)
 
                 # Clear existing data in the DataFrame and the SQLite database
-                self.booking_data = pd.DataFrame(columns=['Booking_Date', 'Travel_Date', 'Booking_Ref', 'Name', 'Phone_No', 'Adult', 'Net_Price'])
+                self.booking_data = pd.DataFrame(columns=['Booking_Date', 'Travel_Date', 'Booking_Ref', 'Name', 'Phone_No', 'Adult', 'Net_Price', 'Email'])
                 self.save_data_to_db()
 
                 count = 0
@@ -181,7 +185,7 @@ class BookingManagementSystem:
                     sheet_data['Phone_No'] = data['Phone']
                     sheet_data['Adult'] = pd.to_numeric(data['Adult'], errors='coerce')
                     sheet_data['Net_Price'] = pd.to_numeric(data['Net Price'].str.replace(' AED', ''), errors='coerce')
-
+                    sheet_data['Email'] = data['Email']
                     sheet_data['Count'] = range(count + 1, count + 1 + len(sheet_data))
                     count += len(sheet_data)
 
@@ -252,7 +256,7 @@ class BookingManagementSystem:
                 all_data = pd.read_excel(file_path, sheet_name=None)
 
                 # Clear existing data in the DataFrame
-                self.booking_data = pd.DataFrame(columns=['Count', 'Booking Date', 'Travel Date', 'Booking Ref', 'Name'])
+                self.booking_data = pd.DataFrame(columns=['Count', 'Booking Date', 'Travel Date', 'Booking Ref', 'Name', 'Email'])
 
                 count = 0
 
@@ -266,7 +270,7 @@ class BookingManagementSystem:
                     sheet_data['Phone No'] = data['Phone']
                     sheet_data['Adult'] = pd.to_numeric(data['Adult'], errors='coerce')
                     sheet_data['Net Price'] = pd.to_numeric(data['Net Price'].str.replace(' AED', ''), errors='coerce')
-
+                    sheet_data['Email'] = data['Email']
                     sheet_data['Count'] = range(count + 1, count + 1 + len(sheet_data))
                     count += len(sheet_data)
 
