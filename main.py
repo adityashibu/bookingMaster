@@ -122,7 +122,7 @@ class BookingManagementSystem:
                 
                 
     #===============================HANDLE MAIL REQUESTS AND MAIL WINDOWS=======================================#
-    def open_mail_window(self, booking_ref, customer_name, customer_email, customer_phone, customer_travel_date):
+    def open_mail_window(self, booking_ref=None, customer_name=None, customer_email=None, customer_phone=None, customer_travel_date=None):
         def upload_museum_tickets():
             # Function to handle uploading Museum of the Future tickets
             file_path = filedialog.askopenfilename(filetypes=[("All files", "*.*")])
@@ -222,10 +222,20 @@ class BookingManagementSystem:
         dubai_tickets_button.grid(row=9, column=1, padx=10, pady=10)
         dubai_tickets_label = tk.Label(mail_window, text="")
         dubai_tickets_label.grid(row=9, column=2, padx=10, pady=10)
+        
+        # Label and DateEntry widget for selecting date
+        tk.Label(mail_window, text="Schedule Mail Date:").grid(row=10, column=0, padx=10, pady=10)
+        schedule_date_entry = DateEntry(mail_window, date_pattern='dd-mm-yyyy')
+        schedule_date_entry.grid(row=10, column=1, padx=10, pady=10)
+
+        # Label and Entry widget for selecting time
+        tk.Label(mail_window, text="Schedule Mail Time (24-hour format):").grid(row=11, column=0, padx=10, pady=10)
+        schedule_time_entry = tk.Entry(mail_window)
+        schedule_time_entry.grid(row=11, column=1, padx=10, pady=10)
 
         # Button to send mail
         send_button = tk.Button(mail_window, text="Send Mail")
-        send_button.grid(row=10, column=0, columnspan=2, padx=10, pady=10)
+        send_button.grid(row=12, column=0, columnspan=2, padx=10, pady=10)
         
         # Set default values for entry fields based on the extracted details
         booking_ref_entry.insert(0, booking_ref)
