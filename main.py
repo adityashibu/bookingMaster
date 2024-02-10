@@ -67,6 +67,9 @@ class BookingManagementSystem:
                 col_index = self.tree['columns'].index(col)
                 self.tree.bind('<B1-Motion>', lambda event, c=col, i=col_index: self.on_column_resizing(event, c))
                 self.tree.bind(f'<ButtonRelease-1>', self.on_column_release)
+                
+        # Bind double click event to the treeview
+        self.tree.bind('<Double-1>', self.on_row_double_click)
 
         # Add a Sizegrip widget for automatic column width adjustment
         self.sizegrip = ttk.Sizegrip(root)
@@ -119,7 +122,7 @@ class BookingManagementSystem:
                 
                 
     #===============================HANDLE MAIL REQUESTS AND MAIL WINDOWS=======================================#
-    def open_mail_window(self):
+    def open_mail_window(self, booking_ref, customer_name, customer_email, customer_phone, customer_travel_date):
         def fetch_data():
             booking_ref = booking_ref_entry.get()
             if booking_ref:
@@ -207,6 +210,32 @@ class BookingManagementSystem:
         # Button to send mail
         send_button = tk.Button(mail_window, text="Send Mail")
         send_button.grid(row=10, column=0, columnspan=2, padx=10, pady=10)
+        
+        # Set default values for entry fields based on the extracted details
+        booking_ref_entry.insert(0, booking_ref)
+        customer_name_entry.insert(0, customer_name)
+        customer_mail_entry.insert(0, customer_email)
+        customer_phone_entry.insert(0, customer_phone)
+        customer_travel_date_entry.insert(0, customer_travel_date)
+        
+    def on_row_double_click(self, event):
+        # Get the selected item from the event
+        item = self.tree.selection()[0]
+        
+        # Get the data of the selected row
+        selected_row = self.tree.item(item, 'values')
+        
+        # print(selected_row)  # Add this line to print the selected row
+        
+        # Extract relevant information from the selected row
+        booking_ref = selected_row[3]  # Booking Reference
+        customer_name = selected_row[4]  # Customer Name
+        customer_email = selected_row[5]  # Customer Email
+        customer_phone = selected_row[6]  # Customer Phone No
+        customer_travel_date = selected_row[2]  # Customer Travel Date
+
+        # Open the mail window with the extracted details
+        self.open_mail_window(booking_ref, customer_name, customer_email, customer_phone, customer_travel_date)
 
     #======================================DB CONNECTIONS AND CONFIGURATIONS====================================#
         
