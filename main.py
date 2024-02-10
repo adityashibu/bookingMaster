@@ -131,13 +131,16 @@ class BookingManagementSystem:
                 cursor = conn.cursor()
 
                 # Execute the query
-                cursor.execute("SELECT Email, [Phone No], [Travel Date] FROM bookings WHERE [Booking Ref]=?", (booking_ref,))
+                cursor.execute("SELECT Name, Email, [Phone No], [Travel Date] FROM bookings WHERE [Booking Ref]=?", (booking_ref,))
 
                 # Fetch one row
                 row = cursor.fetchone()
 
                 if row:
-                    # Autofill customer email, phone, and travel date fields
+                    # Autofill customer name, email, phone, and travel date fields
+                    customer_name_entry.delete(0, tk.END)
+                    customer_name_entry.insert(0, row['Name'])
+                    
                     customer_mail_entry.delete(0, tk.END)
                     customer_mail_entry.insert(0, row['Email'])
 
@@ -168,38 +171,42 @@ class BookingManagementSystem:
         fetch_button.grid(row=1, column=0, columnspan=2, padx=10, pady=10)
 
         # Labels for customer mail, phone, and travel date
-        tk.Label(mail_window, text="Customer Mail:").grid(row=2, column=0, padx=10, pady=10)
+        tk.Label(mail_window, text="Customer Name:").grid(row=2, column=0, padx=10, pady=10)
+        customer_name_entry = tk.Entry(mail_window)
+        customer_name_entry.grid(row=2, column=1, padx=10, pady=10)
+        
+        tk.Label(mail_window, text="Customer Mail:").grid(row=3, column=0, padx=10, pady=10)
         customer_mail_entry = tk.Entry(mail_window)
-        customer_mail_entry.grid(row=2, column=1, padx=10, pady=10)
+        customer_mail_entry.grid(row=3, column=1, padx=10, pady=10)
 
-        tk.Label(mail_window, text="Customer Phone:").grid(row=3, column=0, padx=10, pady=10)
+        tk.Label(mail_window, text="Customer Phone:").grid(row=4, column=0, padx=10, pady=10)
         customer_phone_entry = tk.Entry(mail_window)
-        customer_phone_entry.grid(row=3, column=1, padx=10, pady=10)
+        customer_phone_entry.grid(row=4, column=1, padx=10, pady=10)
 
-        tk.Label(mail_window, text="Customer Travel Date:").grid(row=4, column=0, padx=10, pady=10)
+        tk.Label(mail_window, text="Customer Travel Date:").grid(row=5, column=0, padx=10, pady=10)
         customer_travel_date_entry = tk.Entry(mail_window)
-        customer_travel_date_entry.grid(row=4, column=1, padx=10, pady=10)
+        customer_travel_date_entry.grid(row=5, column=1, padx=10, pady=10)
 
-        tk.Label(mail_window, text="Mail Subject:").grid(row=5, column=0, padx=10, pady=10)
+        tk.Label(mail_window, text="Mail Subject:").grid(row=6, column=0, padx=10, pady=10)
         mail_subject_entry = tk.Entry(mail_window)
-        mail_subject_entry.grid(row=5, column=1, padx=10, pady=10)
+        mail_subject_entry.grid(row=6, column=1, padx=10, pady=10)
 
-        tk.Label(mail_window, text="Mail Body:").grid(row=6, column=0, padx=10, pady=10)
+        tk.Label(mail_window, text="Mail Body:").grid(row=7, column=0, padx=10, pady=10)
         mail_body_entry = tk.Text(mail_window, height=5, width=30)
-        mail_body_entry.grid(row=6, column=1, padx=10, pady=10)
+        mail_body_entry.grid(row=7, column=1, padx=10, pady=10)
 
         # File upload options
-        tk.Label(mail_window, text="Museum of the Future Tickets:").grid(row=7, column=0, padx=10, pady=10)
+        tk.Label(mail_window, text="Museum of the Future Tickets:").grid(row=8, column=0, padx=10, pady=10)
         museum_tickets_button = tk.Button(mail_window, text="Upload")
-        museum_tickets_button.grid(row=7, column=1, padx=10, pady=10)
+        museum_tickets_button.grid(row=8, column=1, padx=10, pady=10)
 
-        tk.Label(mail_window, text="Dubai Frame Tickets:").grid(row=8, column=0, padx=10, pady=10)
+        tk.Label(mail_window, text="Dubai Frame Tickets:").grid(row=9, column=0, padx=10, pady=10)
         dubai_tickets_button = tk.Button(mail_window, text="Upload")
-        dubai_tickets_button.grid(row=8, column=1, padx=10, pady=10)
+        dubai_tickets_button.grid(row=9, column=1, padx=10, pady=10)
 
         # Button to send mail
         send_button = tk.Button(mail_window, text="Send Mail")
-        send_button.grid(row=9, column=0, columnspan=2, padx=10, pady=10)
+        send_button.grid(row=10, column=0, columnspan=2, padx=10, pady=10)
 
     #======================================DB CONNECTIONS AND CONFIGURATIONS====================================#
         
