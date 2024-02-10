@@ -123,6 +123,18 @@ class BookingManagementSystem:
                 
     #===============================HANDLE MAIL REQUESTS AND MAIL WINDOWS=======================================#
     def open_mail_window(self, booking_ref, customer_name, customer_email, customer_phone, customer_travel_date):
+        def upload_museum_tickets():
+            # Function to handle uploading Museum of the Future tickets
+            file_path = filedialog.askopenfilename(filetypes=[("All files", "*.*")])
+            if file_path:
+                museum_tickets_label.config(text=file_path)
+                
+        def upload_dubai_frame_tickets():
+            # Function to handle uploading Dubai Frame tickets
+            file_path = filedialog.askopenfilename(filetypes=[("All files", "*.*")])
+            if file_path:
+                dubai_tickets_label.config(text=file_path)
+                
         def fetch_data():
             booking_ref = booking_ref_entry.get()
             if booking_ref:
@@ -200,12 +212,16 @@ class BookingManagementSystem:
 
         # File upload options
         tk.Label(mail_window, text="Museum of the Future Tickets:").grid(row=8, column=0, padx=10, pady=10)
-        museum_tickets_button = tk.Button(mail_window, text="Upload")
+        museum_tickets_button = tk.Button(mail_window, text="Upload", command=upload_museum_tickets)
         museum_tickets_button.grid(row=8, column=1, padx=10, pady=10)
+        museum_tickets_label = tk.Label(mail_window, text="")
+        museum_tickets_label.grid(row=8, column=2, padx=10, pady=10)
 
         tk.Label(mail_window, text="Dubai Frame Tickets:").grid(row=9, column=0, padx=10, pady=10)
-        dubai_tickets_button = tk.Button(mail_window, text="Upload")
+        dubai_tickets_button = tk.Button(mail_window, text="Upload", command=upload_dubai_frame_tickets)
         dubai_tickets_button.grid(row=9, column=1, padx=10, pady=10)
+        dubai_tickets_label = tk.Label(mail_window, text="")
+        dubai_tickets_label.grid(row=9, column=2, padx=10, pady=10)
 
         # Button to send mail
         send_button = tk.Button(mail_window, text="Send Mail")
