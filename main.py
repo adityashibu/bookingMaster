@@ -123,24 +123,35 @@ class BookingManagementSystem:
         def fetch_data():
             booking_ref = booking_ref_entry.get()
             if booking_ref:
-                # Query the database to fetch data for the given booking reference
-                cursor = self.db_connection.cursor()
-                cursor.execute("SELECT Email, Phone_No, Travel_Date FROM bookings WHERE Booking_Ref=?", (booking_ref,))
-                result = cursor.fetchone()
-                cursor.close()
+                # Connect to the database
+                conn = sqlite3.connect('booking_data.db')
+                conn.row_factory = sqlite3.Row  # Set row_factory to get rows as dictionaries
 
-                if result:
+                # Create a cursor
+                cursor = conn.cursor()
+
+                # Execute the query
+                cursor.execute("SELECT Email, [Phone No], [Travel Date] FROM bookings WHERE [Booking Ref]=?", (booking_ref,))
+
+                # Fetch one row
+                row = cursor.fetchone()
+
+                if row:
                     # Autofill customer email, phone, and travel date fields
                     customer_mail_entry.delete(0, tk.END)
-                    customer_mail_entry.insert(0, result[0])
+                    customer_mail_entry.insert(0, row['Email'])
 
                     customer_phone_entry.delete(0, tk.END)
-                    customer_phone_entry.insert(0, result[1])
+                    customer_phone_entry.insert(0, row['Phone No'])
 
                     customer_travel_date_entry.delete(0, tk.END)
-                    customer_travel_date_entry.insert(0, result[2])
+                    customer_travel_date_entry.insert(0, row['Travel Date'])
                 else:
                     messagebox.showerror("Error", "No data found for the given booking reference.")
+
+                # Close the cursor and connection
+                cursor.close()
+                conn.close()
             else:
                 messagebox.showerror("Error", "Please enter a booking reference.")
 
