@@ -9,6 +9,7 @@ import sqlite3
 import smtplib
 import datetime
 import threading
+import openpyxl
 import os
 from email.message import EmailMessage
 import ssl
@@ -37,6 +38,7 @@ class BookingManagementSystem:
         menu_bar.add_cascade(label="File", menu=file_menu)
         file_menu.add_command(label="Import Data", command=self.import_data)
         file_menu.add_command(label="Export to Excel", command=self.export_to_excel)  # Add Export to Excel option
+        file_menu.add_command(label="Update Excel", command=self.update_excel)
         file_menu.add_separator()
         file_menu.add_command(label="Close", command=self.on_close)
 
@@ -127,6 +129,45 @@ class BookingManagementSystem:
                 messagebox.showinfo("Export Successful", f"Data exported to {file_path} successfully.")
             except Exception as e:
                 messagebox.showerror("Export Error", f"An error occurred while exporting data: {e}")
+                
+    def update_excel(self):
+        # Check if there is data to export
+        if self.booking_data.empty:
+            messagebox.showinfo("No Data", "There is no data to export.")
+            return
+
+        # Ask user for file save location
+        file_path = filedialog.askopenfilename(defaultextension=".xlsx", filetypes=[("Excel files", "*.xlsx")])
+        if file_path:
+            try:
+                # Read the existing Excel file if it exists
+                if os.path.exists(file_path):
+                    wb = openpyxl.load_workbook(file_path)
+                    ws = wb.active
+
+                    # Get the existing booking references from the Excel sheet
+                    existing_booking_refs = set(ws.cell(row=row_index, column=4).value for row_index in range(2, ws.max_row + 1))
+
+                    # Get only the relevant columns from the DataFrame
+                    relevant_columns = self.booking_data[['Count', 'Booking Date', 'Travel Date', 'Booking Ref', 'Name', 'Email', 'Phone No', 'Adult', 'Net Price']]
+
+                    # Append new entries to the Excel file
+                    for index, row in relevant_columns.iterrows():
+                        booking_ref = row['Booking Ref']
+                        if booking_ref not in existing_booking_refs:
+                            values = row.tolist()
+                            ws.append(values)
+                            existing_booking_refs.add(booking_ref)
+
+                    # Save the updated Excel file
+                    wb.save(file_path)
+                    messagebox.showinfo("Update Successful", f"Data updated in {file_path} successfully.")
+                else:
+                    # If the file doesn't exist, simply export the data
+                    self.booking_data[['Count', 'Booking Date', 'Travel Date', 'Booking Ref', 'Name', 'Email', 'Phone No', 'Adult', 'Net Price']].to_excel(file_path, index=False)
+                    messagebox.showinfo("Export Successful", f"Data exported to {file_path} successfully.")
+            except Exception as e:
+                messagebox.showerror("Update Error", f"An error occurred while updating data: {e}")
                 
                 
     #===============================HANDLE MAIL REQUESTS AND MAIL WINDOWS=======================================#
