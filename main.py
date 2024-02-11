@@ -53,6 +53,7 @@ class BookingManagementSystem:
         mail_menu = tk.Menu(menu_bar, tearoff=0)
         menu_bar.add_cascade(label="Mail", menu=mail_menu)
         mail_menu.add_command(label="Mail to Customer", command=self.open_mail_window)
+        mail_menu.add_command(label="Scheduled Mails", command=self.open_scheduled_mails_window)
 
         # Create a DataFrame for holding booking data
         self.booking_data = pd.DataFrame(columns=['Count', 'Booking Date', 'Travel Date', 'Booking Ref', 'Name', 'Email', 'Phone No', 'Adult', 'Net Price'])
@@ -129,6 +130,25 @@ class BookingManagementSystem:
                 
                 
     #===============================HANDLE MAIL REQUESTS AND MAIL WINDOWS=======================================#
+    def open_scheduled_mails_window(self):
+        scheduled_mails_window = tk.Toplevel(self.root)
+        scheduled_mails_window.title("Scheduled Mails")
+
+        # Create a frame to display scheduled mails
+        scheduled_mails_frame = ttk.Frame(scheduled_mails_window)
+        scheduled_mails_frame.pack(fill=tk.BOTH, expand=True)
+
+        # Create a treeview widget to display scheduled mails with the specified columns
+        columns = ["Booking Reference", "Customer Name", "Customer Email", "Scheduled Date", "Message"]
+        scheduled_mails_tree = ttk.Treeview(scheduled_mails_frame, columns=columns, show='headings')
+        scheduled_mails_tree.tag_configure("style", background="white", foreground="black")
+
+        for col in columns:
+            scheduled_mails_tree.heading(col, text=col)
+            scheduled_mails_tree.column(col, width=100, anchor='center')
+
+        scheduled_mails_tree.pack(fill=tk.BOTH, expand=True)
+        
     def open_mail_window(self, booking_ref=None, customer_name=None, customer_email=None, customer_phone=None, customer_travel_date=None):
         def upload_museum_tickets():
             # Function to handle uploading Museum of the Future tickets
