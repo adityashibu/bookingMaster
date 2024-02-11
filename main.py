@@ -7,6 +7,7 @@ import pandas as pd
 import json
 import sqlite3
 import smtplib
+import os
 from email.message import EmailMessage
 import ssl
 from credentials import email_password, email_sender
@@ -139,7 +140,7 @@ class BookingManagementSystem:
             if file_path:
                 dubai_tickets_label.config(text=file_path)
                 
-        def send_mail(email_reciever, subject, body):
+        def send_mail(email_reciever, subject, body, attachments=None):
             em = EmailMessage()
             em['From'] = email_sender
             em['To'] = email_reciever
@@ -147,7 +148,15 @@ class BookingManagementSystem:
             em.set_content(body)
             
             context = ssl.create_default_context()
-            
+                
+            # Attach files if any
+            if attachments:
+                for attachment in attachments:
+                    with open(attachment, 'rb') as file:
+                        file_data = file.read()
+                        file_name = os.path.basename(attachment)
+                    em.add_attachment(file_data, maintype='application', subtype='octet-stream', filename=file_name)
+                    
             with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
                 smtp.login(email_sender, email_password)
                 smtp.sendmail(email_sender, email_reciever, em.as_string())
@@ -251,7 +260,7 @@ class BookingManagementSystem:
         schedule_time_entry.grid(row=11, column=1, padx=10, pady=10)
 
         # Button to send mail
-        send_button = tk.Button(mail_window, text="Send Mail", command=lambda: send_mail(customer_mail_entry.get(), mail_subject_entry.get(), mail_body_entry.get('1.0', 'end')))
+        send_button = tk.Button(mail_window, text="Send Mail", command=lambda: send_mail(customer_mail_entry.get(), mail_subject_entry.get(), mail_body_entry.get('1.0', 'end'), attachments=[museum_tickets_label.cget("text"), dubai_tickets_label.cget("text")]))
         send_button.grid(row=12, column=0, columnspan=2, padx=10, pady=10)
         
         # Set default values for entry fields based on the extracted details
