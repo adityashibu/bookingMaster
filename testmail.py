@@ -1,5 +1,4 @@
 import smtplib
-import os
 from email.message import EmailMessage
 import ssl
 from credentials import email_password, email_sender
