@@ -6,6 +6,13 @@ from tkcalendar import DateEntry
 import pandas as pd
 import json
 import sqlite3
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import os
+
+MAIL_ID = os.getenv('MAIL_ID')
+MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
 
 class BookingManagementSystem:
     def __init__(self, root):
