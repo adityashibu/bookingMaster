@@ -7,6 +7,8 @@ import pandas as pd
 import json
 import sqlite3
 import smtplib
+import datetime
+import threading
 import os
 from email.message import EmailMessage
 import ssl
@@ -140,7 +142,7 @@ class BookingManagementSystem:
             if file_path:
                 dubai_tickets_label.config(text=file_path)
                 
-        def send_mail(email_reciever, subject, body, attachments=None):
+        def send_mail(email_reciever, subject, body, send_datetime=None, **kwargs):
             em = EmailMessage()
             em['From'] = email_sender
             em['To'] = email_reciever
@@ -148,6 +150,8 @@ class BookingManagementSystem:
             em.set_content(body)
             
             context = ssl.create_default_context()
+            
+            attachments = kwargs.get('attachments', None)
                 
             # Attach files if any
             if attachments:
@@ -258,9 +262,39 @@ class BookingManagementSystem:
         tk.Label(mail_window, text="Schedule Mail Time (24-hour format):").grid(row=11, column=0, padx=10, pady=10)
         schedule_time_entry = tk.Entry(mail_window)
         schedule_time_entry.grid(row=11, column=1, padx=10, pady=10)
+        
+        def schedule_and_send_mail():
+            # Get selected date and time
+            send_date = schedule_date_entry.get_date()
+            send_time_str = schedule_time_entry.get()
+            send_time = datetime.datetime.strptime(send_time_str, "%H:%M").time()
 
+            # Combine date and time
+            send_datetime = datetime.datetime.combine(send_date, send_time)
+
+            # Schedule the mail sending task
+            threading.Thread(target=send_mail_threaded, args=(send_datetime,)).start()
+            
+        def send_mail_threaded(send_datetime):
+            # Get other mail details
+            email_receiver = customer_mail_entry.get()
+            subject = mail_subject_entry.get()
+            body = mail_body_entry.get('1.0', 'end')
+            attachments = [museum_tickets_label.cget("text"), dubai_tickets_label.cget("text")]
+
+            # Calculate the delay in seconds
+            delay = (send_datetime - datetime.datetime.now()).total_seconds()
+
+            # If the delay is negative, send the mail immediately
+            if delay <= 0:
+                send_mail(email_receiver, subject, body, attachments=attachments)
+            else:
+                # Wait for the specified time before sending the mail
+                threading.Timer(delay, send_mail, args=(email_receiver, subject, body), kwargs={"attachments": attachments}).start()
+
+        
         # Button to send mail
-        send_button = tk.Button(mail_window, text="Send Mail", command=lambda: send_mail(customer_mail_entry.get(), mail_subject_entry.get(), mail_body_entry.get('1.0', 'end'), attachments=[museum_tickets_label.cget("text"), dubai_tickets_label.cget("text")]))
+        send_button = tk.Button(mail_window, text="Schedule and Send Mail", command=schedule_and_send_mail)
         send_button.grid(row=12, column=0, columnspan=2, padx=10, pady=10)
         
         # Set default values for entry fields based on the extracted details
