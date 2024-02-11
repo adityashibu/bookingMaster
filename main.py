@@ -7,12 +7,9 @@ import pandas as pd
 import json
 import sqlite3
 import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-import os
-
-MAIL_ID = os.getenv('MAIL_ID')
-MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
+from email.message import EmailMessage
+import ssl
+from credentials import email_password, email_sender
 
 class BookingManagementSystem:
     def __init__(self, root):
@@ -142,6 +139,19 @@ class BookingManagementSystem:
             if file_path:
                 dubai_tickets_label.config(text=file_path)
                 
+        def send_mail(email_reciever, subject, body):
+            em = EmailMessage()
+            em['From'] = email_sender
+            em['To'] = email_reciever
+            em['Subject'] = subject
+            em.set_content(body)
+            
+            context = ssl.create_default_context()
+            
+            with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
+                smtp.login(email_sender, email_password)
+                smtp.sendmail(email_sender, email_reciever, em.as_string())
+                
         def fetch_data():
             booking_ref = booking_ref_entry.get()
             if booking_ref:
@@ -241,7 +251,7 @@ class BookingManagementSystem:
         schedule_time_entry.grid(row=11, column=1, padx=10, pady=10)
 
         # Button to send mail
-        send_button = tk.Button(mail_window, text="Send Mail")
+        send_button = tk.Button(mail_window, text="Send Mail", command=lambda: send_mail(customer_mail_entry.get(), mail_subject_entry.get(), mail_body_entry.get('1.0', 'end')))
         send_button.grid(row=12, column=0, columnspan=2, padx=10, pady=10)
         
         # Set default values for entry fields based on the extracted details
