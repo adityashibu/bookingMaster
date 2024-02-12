@@ -58,7 +58,7 @@ class BookingManagementSystem:
         mail_menu.add_command(label="Scheduled Mails", command=self.open_scheduled_mails_window)
 
         # Create a DataFrame for holding booking data
-        self.booking_data = pd.DataFrame(columns=['Count', 'Booking Date', 'Travel Date', 'Product', 'Booking Ref', 'Name', 'Country', 'Email', 'Phone No', 'Adult', 'Net Price'])
+        self.booking_data = pd.DataFrame(columns=['Count', 'Booking Date', 'Travel Date', 'Product', 'Booking Ref', 'Name', 'Country', 'Email', 'Phone No', 'Adult', 'GYG Price', 'Net Price'])
 
         # Create a table (Treeview) for displaying data
         columns = list(self.booking_data.columns)
@@ -146,10 +146,10 @@ class BookingManagementSystem:
                     ws = wb.active
 
                     # Get the existing booking references from the Excel sheet
-                    existing_booking_refs = set(ws.cell(row=row_index, column=4).value for row_index in range(2, ws.max_row + 1))
+                    existing_booking_refs = set(ws.cell(row=row_index, column=5).value for row_index in range(2, ws.max_row + 1))
 
                     # Get only the relevant columns from the DataFrame
-                    relevant_columns = self.booking_data[['Count', 'Booking Date', 'Travel Date', 'Product', 'Booking Ref', 'Name', 'Country', 'Email', 'Phone No', 'Adult', 'Net Price']]
+                    relevant_columns = self.booking_data[['Count', 'Booking Date', 'Travel Date', 'Product', 'Booking Ref', 'Name', 'Country', 'Email', 'Phone No', 'Adult', 'GYG Price', 'Net Price']]
 
                     # Append new entries to the Excel file
                     for index, row in relevant_columns.iterrows():
@@ -164,7 +164,7 @@ class BookingManagementSystem:
                     messagebox.showinfo("Update Successful", f"Data updated in {file_path} successfully.")
                 else:
                     # If the file doesn't exist, simply export the data
-                    self.booking_data[['Count', 'Booking Date', 'Travel Date', 'Product', 'Booking Ref', 'Name', 'Country', 'Email', 'Phone No', 'Adult', 'Net Price']].to_excel(file_path, index=False)
+                    self.booking_data[['Count', 'Booking Date', 'Travel Date', 'Product', 'Booking Ref', 'Name', 'Country', 'Email', 'Phone No', 'Adult', 'GYG Price', 'Net Price']].to_excel(file_path, index=False)
                     messagebox.showinfo("Export Successful", f"Data exported to {file_path} successfully.")
             except Exception as e:
                 messagebox.showerror("Update Error", f"An error occurred while updating data: {e}")
@@ -405,6 +405,7 @@ class BookingManagementSystem:
             Country TEXT,
             Phone_No TEXT,
             Adult INTEGER,
+            GYG_Price REAL,
             Net_Price REAL,
             Email TEXT
         );
@@ -425,7 +426,7 @@ class BookingManagementSystem:
             self.update_treeview()
         except pd.io.sql.DatabaseError:
             # Use default data if the table is empty or not found
-            self.booking_data = pd.DataFrame(columns=['Booking_Date', 'Travel_Date', 'Product', 'Booking_Ref', 'Name', 'Country', 'Phone_No', 'Adult', 'Net_Price', 'Email'])
+            self.booking_data = pd.DataFrame(columns=['Booking_Date', 'Travel_Date', 'Product', 'Booking_Ref', 'Name', 'Country', 'Phone_No', 'Adult', 'GYG_Price', 'Net_Price', 'Email'])
             self.update_treeview()
 
     def import_data(self):
@@ -435,7 +436,7 @@ class BookingManagementSystem:
                 all_data = pd.read_excel(file_path, sheet_name=None)
 
                 # Clear existing data in the DataFrame and the SQLite database
-                self.booking_data = pd.DataFrame(columns=['Booking_Date', 'Travel_Date', 'Product', 'Booking_Ref', 'Name', 'Country', 'Phone_No', 'Adult', 'Net_Price', 'Email'])
+                self.booking_data = pd.DataFrame(columns=['Booking_Date', 'Travel_Date', 'Product', 'Booking_Ref', 'Name', 'Country', 'Phone_No', 'Adult', 'GYG_Price', 'Net_Price', 'Email'])
                 self.save_data_to_db()
 
                 count = 0
@@ -451,6 +452,7 @@ class BookingManagementSystem:
                     sheet_data['Country'] = data['Traveler\'s Country']
                     sheet_data['Phone_No'] = data['Phone']
                     sheet_data['Adult'] = pd.to_numeric(data['Adult'], errors='coerce')
+                    sheet_data['GYG_Price'] = pd.to_numeric(data['Price'].str.replace(' AED', ''), errors='coerce')
                     sheet_data['Net_Price'] = pd.to_numeric(data['Net Price'].str.replace(' AED', ''), errors='coerce')
                     sheet_data['Email'] = data['Email']
                     sheet_data['Count'] = range(count + 1, count + 1 + len(sheet_data))
@@ -538,6 +540,7 @@ class BookingManagementSystem:
                     sheet_data['Country'] = data['Traveler\'s Country']
                     sheet_data['Phone No'] = data['Phone']
                     sheet_data['Adult'] = pd.to_numeric(data['Adult'], errors='coerce')
+                    sheet_data['GYG Price'] = pd.to_numeric(data['Price'].str.replace(' AED', ''), errors='coerce')
                     sheet_data['Net Price'] = pd.to_numeric(data['Net Price'].str.replace(' AED', ''), errors='coerce')
                     sheet_data['Email'] = data['Email']
                     sheet_data['Count'] = range(count + 1, count + 1 + len(sheet_data))
