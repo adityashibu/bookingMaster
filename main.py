@@ -1,8 +1,4 @@
 import tkinter as tk
-from tkinter import filedialog
-from tkinter import ttk
-from tkinter import messagebox
-from tkcalendar import DateEntry
 import pandas as pd
 import json
 import sqlite3
@@ -11,8 +7,13 @@ import datetime
 import threading
 import openpyxl
 import os
-from email.message import EmailMessage
 import ssl
+
+from tkinter import filedialog
+from tkinter import ttk
+from tkinter import messagebox
+from tkcalendar import DateEntry
+from email.message import EmailMessage
 from credentials import email_password, email_sender
 
 class BookingManagementSystem:
