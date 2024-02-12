@@ -70,6 +70,7 @@ instance/
 
 # Database files
 *.sqlite3
+booking_data.db
 
 # Sphinx documentation
 docs/_build/
