@@ -335,25 +335,37 @@ class BookingManagementSystem:
             send_datetime = datetime.datetime.combine(send_date, send_time)
 
             # Schedule the mail sending task
-            threading.Thread(target=send_mail_threaded, args=(send_datetime,)).start()
+            success = send_mail_threaded(send_datetime)
+            
+            if success:
+                success_message = f"Your mail to {customer_name_entry.get()}: {booking_ref_entry.get()} has been successfully scheduled for {send_datetime}"
+                messagebox.showinfo("Success", success_message)
+                mail_window.destroy()
+            else:
+                messagebox.showerror("Error", "Mail not Scheduled")
             
         def send_mail_threaded(send_datetime):
-            # Get other mail details
-            email_receiver = customer_mail_entry.get()
-            subject = mail_subject_entry.get()
-            body = mail_body_entry.get('1.0', 'end')
-            attachments = [museum_tickets_label.cget("text"), dubai_tickets_label.cget("text")]
+            try:
+                    # Get other mail details
+                    email_receiver = customer_mail_entry.get()
+                    subject = mail_subject_entry.get()
+                    body = mail_body_entry.get('1.0', 'end')
+                    attachments = [museum_tickets_label.cget("text"), dubai_tickets_label.cget("text")]
 
-            # Calculate the delay in seconds
-            delay = (send_datetime - datetime.datetime.now()).total_seconds()
+                    # Calculate the delay in seconds
+                    delay = (send_datetime - datetime.datetime.now()).total_seconds()
 
-            # If the delay is negative, send the mail immediately
-            if delay <= 0:
-                send_mail(email_receiver, subject, body, attachments=attachments)
-            else:
-                # Wait for the specified time before sending the mail
-                threading.Timer(delay, send_mail, args=(email_receiver, subject, body), kwargs={"attachments": attachments}).start()
-
+                    # If the delay is negative, send the mail immediately
+                    if delay <= 0:
+                        send_mail(email_receiver, subject, body, attachments=attachments)
+                        return True
+                    else:
+                        # Wait for the specified time before sending the mail
+                        threading.Timer(delay, send_mail, args=(email_receiver, subject, body), kwargs={"attachments": attachments}).start()
+                        return True
+            except Exception as e:
+                print(e)  # Handle exceptions as needed
+                return False
         
         # Button to send mail
         send_button = tk.Button(mail_window, text="Schedule and Send Mail", command=schedule_and_send_mail)
@@ -376,10 +388,10 @@ class BookingManagementSystem:
         # print(selected_row)  # Add this line to print the selected row
         
         # Extract relevant information from the selected row
-        booking_ref = selected_row[3]  # Booking Reference
-        customer_name = selected_row[4]  # Customer Name
-        customer_email = selected_row[5]  # Customer Email
-        customer_phone = selected_row[6]  # Customer Phone No
+        booking_ref = selected_row[4]  # Booking Reference
+        customer_name = selected_row[5]  # Customer Name
+        customer_email = selected_row[7]  # Customer Email
+        customer_phone = selected_row[8]  # Customer Phone No
         customer_travel_date = selected_row[2]  # Customer Travel Date
 
         # Open the mail window with the extracted details
