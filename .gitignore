@@ -69,7 +69,7 @@ instance/
 .scrapy
 
 # Database files
-*Db.*
+*.sqlite3
 
 # Sphinx documentation
 docs/_build/
