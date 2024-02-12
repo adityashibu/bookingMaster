@@ -18,3 +18,20 @@
 - Database Integration
     - It seamlessely intergrates with an SQLite Database, providing reliable storage solution for the booking data.
     - Users can save and retrieve booking information from the database, ensuring data persistence and accessibility.
+
+## Benefits of using this System
+- Efficiency
+    - By automating tasks such as data import/export and email communication, the system saves time and reduces manual effort.
+    - Search and Filtering functionalities help users quickly locate relevant booking information in one place, hence improving productivity.
+
+- Organization
+    - The system provides a centralized platform for managing booking data, helping users keep track of bookings, customer information, and communication history in one place.
+    - Database integration ensures data consistency and eliminates the need for maintaining separate data repositories.
+
+- Communication 
+    - Seamless email integration allows users to stay in touch with customers, send reminders, confirmations, or other communications directly from the system.
+    - Scheduled email tasks ensure timely communcation without manual intervention, enhancing customer satisfaction and engagement.
+
+- Data Management
+    - The ability to import, export and update booking data ensures data integrity and accuracy, reducing the risk of errors associated with manual data entry or management.
+    - Database Integration provides a secure and scalable storage solution, allowing users to store and query large volumes of booking data efficiently.
