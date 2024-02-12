@@ -20,6 +20,7 @@ class BookingManagementSystem:
     def __init__(self, root):
         self.root = root
         self.root.title("Booking Management System")
+        self.root.iconbitmap('./icon.ico')
 
         # Set up a protocol handler to call save_data_to_db before closing
         root.protocol("WM_DELETE_WINDOW", self.on_close)
@@ -175,6 +176,7 @@ class BookingManagementSystem:
     def open_scheduled_mails_window(self):
         scheduled_mails_window = tk.Toplevel(self.root)
         scheduled_mails_window.title("Scheduled Mails")
+        scheduled_mails_window.iconbitmap('./icon.ico')
 
         # Create a frame to display scheduled mails
         scheduled_mails_frame = ttk.Frame(scheduled_mails_window)
@@ -267,6 +269,7 @@ class BookingManagementSystem:
 
         mail_window = tk.Toplevel(self.root)
         mail_window.title("Send Mail to Customer")
+        mail_window.iconbitmap("./icon.ico")
 
         # Labels and entry widgets for booking reference, mail subject, mail body
         tk.Label(mail_window, text="Booking Reference:").grid(row=0, column=0, padx=10, pady=10)
@@ -573,7 +576,8 @@ class BookingManagementSystem:
         # Create a search dialog
         search_dialog = tk.Toplevel(self.root)
         search_dialog.title("Search Options")
-
+        search_dialog.iconbitmap("./icon.ico")
+        
         # Create a label and dropdown menu for selecting search criteria
         tk.Label(search_dialog, text="Select Search Criteria:").grid(row=0, column=0, padx=10, pady=10)
         search_criteria_var = tk.StringVar()
