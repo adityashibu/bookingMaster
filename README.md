@@ -35,3 +35,19 @@
 - Data Management
     - The ability to import, export and update booking data ensures data integrity and accuracy, reducing the risk of errors associated with manual data entry or management.
     - Database Integration provides a secure and scalable storage solution, allowing users to store and query large volumes of booking data efficiently.
+
+## How to Use
+1. **Installation**: Clone the repository on your local machine:
+    ```Shell
+    git clone https://github.com/adityashibu/bookingMgmt.git
+    ```
+2. **Setup Environment**: Make sure you have python installed on your local machine (Python 3.11 preferred)
+3. **Install Dependencies**: Install the required dependencies for opening and smooth operation of the program: <br>
+    ```python
+    pip install -r requirements.txt
+    ```
+4. **Run the application**: Open the terminal in the current working directory where the main.py file is present and run:
+    ```python
+    python3 main.py
+    ```
+5. **Use the Application**: Follow the on-screen prompts to perform various actions such as adding, viewing, updating, or deleting bookings.
