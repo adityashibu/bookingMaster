@@ -43,6 +43,11 @@ class BookingManagementSystem:
         file_menu.add_command(label="Update Excel", command=self.update_excel)
         file_menu.add_separator()
         file_menu.add_command(label="Close", command=self.on_close)
+        
+        # View Menu
+        view_menu = tk.Menu(menu_bar, tearoff=0)
+        menu_bar.add_cascade(label="View", menu=view_menu)
+        view_menu.add_command(label="View data", command=self.prompt_password)
 
         # Search Menu
         search_menu = tk.Menu(menu_bar, tearoff=0)
