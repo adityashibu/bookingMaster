@@ -12,6 +12,7 @@ import ssl
 from tkinter import filedialog
 from tkinter import ttk
 from tkinter import messagebox
+from tkinter import simpledialog
 from tkcalendar import DateEntry
 from email.message import EmailMessage
 from credentials import email_password, email_sender
@@ -71,6 +72,9 @@ class BookingManagementSystem:
         columns = list(self.booking_data.columns)
         self.tree = ttk.Treeview(root, columns=columns, show='headings')
         self.tree.tag_configure("style", background="white", foreground="black")
+        
+        # Hide Phone No and Email columns initially
+        self.tree["displaycolumns"] = ("Count", "Booking Date", "Travel Date", "Product", "Booking Ref", "Name", "Country")
 
         for col in columns:
             self.tree.heading(col, text=col)
@@ -119,6 +123,14 @@ class BookingManagementSystem:
         self.load_data_from_db()
 
         self.load_column_configuration()
+        
+    def prompt_password(self):
+        password = simpledialog.askstring("Password", "Enter Password:", show='*')
+        if password == "lgt123":  # Replace "your_password" with the actual password
+            # Reveal Phone No and Email columns
+            self.tree["displaycolumns"] = ("Count", "Booking Date", "Travel Date", "Product", "Booking Ref", "Name", "Country", "Phone No", "Email")
+        else:
+            messagebox.showerror("Error", "Incorrect Password")
         
     # Command to convert file to excel
     def export_to_excel(self):
